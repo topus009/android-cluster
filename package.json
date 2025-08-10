@@ -1,0 +1,25 @@
+{
+  "name": "android-cluster",
+  "version": "1.0.0",
+  "description": "Кластер Android устройств для тестирования производительности",
+  "main": "index.js",
+  "scripts": {
+    "setup": "pnpm install && pnpm run setup:git",
+    "setup:git": "git init && git add . && git commit -m 'Initial commit' && git branch android-workers && git branch frontend-interface",
+    "android:install": "cd android-workers && pnpm install",
+    "frontend:install": "cd frontend-interface && pnpm install",
+    "test": "pnpm run test:workers && pnpm run test:frontend",
+    "test:workers": "cd android-workers && pnpm test",
+    "test:frontend": "cd frontend-interface && pnpm test",
+    "android:start": "cd android-workers && pnpm start",
+    "frontend:start": "cd frontend-interface && pnpm start"
+  },
+  "keywords": ["android", "cluster", "performance", "testing", "nodejs"],
+  "author": "Android Cluster Team",
+  "license": "MIT",
+  "packageManager": "pnpm@8.0.0",
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  }
+}

@@ -27,6 +27,17 @@ if (!deviceConfig[deviceId] && deviceId !== 'common') {
 const device = deviceConfig[deviceId];
 const PORT = process.env.PORT || device.port || 3000;
 
+// Безопасные объекты конфигурации без optional chaining
+const caps = (device && device.capabilities) || {
+  maxConcurrentTasks: 5,
+  supportedOperations: ['factorial', 'primeNumbers', 'arraySort', 'hash', 'fibonacci']
+};
+
+const perfCfg = (device && device.performance) || {
+  expectedResponseTime: 100,
+  memoryLimit: 256 * 1024 * 1024
+};
+
 const app = express();
 
 // Middleware
@@ -45,14 +56,8 @@ const deviceInfo = {
   platform: 'Android',
   nodeVersion: process.version,
   startTime: new Date().toISOString(),
-  capabilities: device?.capabilities || {
-    maxConcurrentTasks: 5,
-    supportedOperations: ['factorial', 'primeNumbers', 'arraySort', 'hash', 'fibonacci']
-  },
-  performance: device?.performance || {
-    expectedResponseTime: 100,
-    memoryLimit: 256 * 1024 * 1024
-  }
+  capabilities: caps,
+  performance: perfCfg
 };
 
 // Статистика производительности
@@ -77,8 +82,9 @@ const mathOperations = {
   // Вычисление факториала с проверкой лимитов
   factorial: (n) => {
     if (n <= 1) return 1;
-    if (n > device.capabilities?.factorial?.maxInput || 1000) {
-      throw new Error(`Факториал ${n} превышает лимит устройства (${device.capabilities?.factorial?.maxInput || 1000})`);
+    const maxInput = (caps.factorial && caps.factorial.maxInput) ? caps.factorial.maxInput : 1000;
+    if (n > maxInput) {
+      throw new Error(`Факториал ${n} превышает лимит устройства (${maxInput})`);
     }
     
     let result = 1;
@@ -94,8 +100,9 @@ const mathOperations = {
 
   // Поиск простых чисел до N с оптимизацией
   primeNumbers: (n) => {
-    if (n > device.capabilities?.primeNumbers?.maxInput || 10000) {
-      throw new Error(`Поиск простых чисел до ${n} превышает лимит устройства (${device.capabilities?.primeNumbers?.maxInput || 10000})`);
+    const maxInput = (caps.primeNumbers && caps.primeNumbers.maxInput) ? caps.primeNumbers.maxInput : 10000;
+    if (n > maxInput) {
+      throw new Error(`Поиск простых чисел до ${n} превышает лимит устройства (${maxInput})`);
     }
     
     const primes = [];
@@ -119,8 +126,9 @@ const mathOperations = {
 
   // Сортировка массива с проверкой размера
   arraySort: (size) => {
-    if (size > device.capabilities?.arraySort?.maxSize || 50000) {
-      throw new Error(`Размер массива ${size} превышает лимит устройства (${device.capabilities?.arraySort?.maxSize || 50000})`);
+    const maxSize = (caps.arraySort && caps.arraySort.maxSize) ? caps.arraySort.maxSize : 50000;
+    if (size > maxSize) {
+      throw new Error(`Размер массива ${size} превышает лимит устройства (${maxSize})`);
     }
     
     const arr = Array.from({ length: size }, () => Math.floor(Math.random() * 1000));
@@ -145,8 +153,9 @@ const mathOperations = {
   // Хеширование с проверкой длины
   hash: (input) => {
     const str = input.toString();
-    if (str.length > device.capabilities?.hash?.maxInputLength || 10000) {
-      throw new Error(`Длина входных данных ${str.length} превышает лимит устройства (${device.capabilities?.hash?.maxInputLength || 10000})`);
+    const maxInputLength = (caps.hash && caps.hash.maxInputLength) ? caps.hash.maxInputLength : 10000;
+    if (str.length > maxInputLength) {
+      throw new Error(`Длина входных данных ${str.length} превышает лимит устройства (${maxInputLength})`);
     }
     
     let hash = 0;
@@ -160,8 +169,9 @@ const mathOperations = {
 
   // Числа Фибоначчи с проверкой лимитов
   fibonacci: (n) => {
-    if (n > device.capabilities?.fibonacci?.maxInput || 100) {
-      throw new Error(`Число Фибоначчи ${n} превышает лимит устройства (${device.capabilities?.fibonacci?.maxInput || 100})`);
+    const maxInput = (caps.fibonacci && caps.fibonacci.maxInput) ? caps.fibonacci.maxInput : 100;
+    if (n > maxInput) {
+      throw new Error(`Число Фибоначчи ${n} превышает лимит устройства (${maxInput})`);
     }
     
     if (n <= 1) return n;
@@ -186,7 +196,7 @@ app.post('/api/task', async (req, res) => {
     return res.status(400).json({ 
       error: 'Неизвестная операция',
       supported: Object.keys(mathOperations),
-      deviceCapabilities: device.capabilities
+      deviceCapabilities: caps
     });
   }
 
@@ -196,7 +206,7 @@ app.post('/api/task', async (req, res) => {
   try {
     // Проверяем лимиты устройства
     const memUsage = process.memoryUsage();
-    if (memUsage.heapUsed > device.performance.memoryLimit) {
+    if (memUsage.heapUsed > perfCfg.memoryLimit) {
       throw new Error('Превышен лимит памяти устройства');
     }
 
@@ -271,8 +281,8 @@ app.get('/api/device', (req, res) => {
     memoryUsage: process.memoryUsage(),
     performanceStats,
     config: {
-      capabilities: device.capabilities,
-      performance: device.performance
+      capabilities: caps,
+      performance: perfCfg
     }
   });
 });
@@ -285,8 +295,8 @@ app.get('/api/stats', (req, res) => {
     ...performanceStats,
     currentMemory: process.memoryUsage(),
     config: {
-      capabilities: device.capabilities,
-      performance: device.performance
+      capabilities: caps,
+      performance: perfCfg
     }
   });
 });
@@ -309,7 +319,7 @@ app.get('/api/stats/operations', (req, res) => {
 // Health check с детальной информацией
 app.get('/health', (req, res) => {
   const memUsage = process.memoryUsage();
-  const isHealthy = memUsage.heapUsed < device.performance.memoryLimit;
+  const isHealthy = memUsage.heapUsed < perfCfg.memoryLimit;
   
   res.json({ 
     status: isHealthy ? 'healthy' : 'warning',
@@ -319,7 +329,7 @@ app.get('/health', (req, res) => {
     memoryUsage: {
       heapUsed: Math.round(memUsage.heapUsed / 1024 / 1024 * 100) / 100,
       heapTotal: Math.round(memUsage.heapTotal / 1024 / 1024 * 100) / 100,
-      limit: Math.round(device.performance.memoryLimit / 1024 / 1024 * 100) / 100
+      limit: Math.round(perfCfg.memoryLimit / 1024 / 1024 * 100) / 100
     },
     performance: {
       totalTasks: performanceStats.totalTasks,
@@ -380,8 +390,8 @@ const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`📊 Статистика: http://0.0.0.0:${PORT}/api/stats`);
   console.log(`💚 Health check: http://0.0.0.0:${PORT}/health`);
   console.log(`🔌 WebSocket: ws://0.0.0.0:${PORT}`);
-  console.log(`⚡ Максимум задач: ${device.capabilities.maxConcurrentTasks || 5}`);
-  console.log(`💾 Лимит памяти: ${Math.round(device.performance.memoryLimit / 1024 / 1024)}MB`);
+  console.log(`⚡ Максимум задач: ${caps.maxConcurrentTasks ? caps.maxConcurrentTasks : 5}`);
+  console.log(`💾 Лимит памяти: ${Math.round(perfCfg.memoryLimit / 1024 / 1024)}MB`);
 });
 
 // Подключаем WebSocket к HTTP серверу

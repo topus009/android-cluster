@@ -19,12 +19,13 @@ const colors = {
 // Конфигурация кластера
 const clusterConfig = {
   devices: [
-    { id: 'samsung-note4', name: 'Samsung Note 4', port: 3001, host: '192.168.1.101' },
-    { id: 'samsung-nexus', name: 'Samsung Google Nexus', port: 3002, host: '192.168.1.102' },
-    { id: 'alcatel-7043', name: 'Alcatel One Touch 7043', port: 3003, host: '192.168.1.103' }
+    { id: 'samsung-note4', name: 'Samsung Note 4', port: 3001, host: '192.168.0.9' }
   ],
   frontend: { port: 8080, host: '0.0.0.0' }
 };
+
+// Флаг: запускать ли локальные воркеры (по умолчанию да). Для удалённых телефонов установите SPAWN_LOCAL_WORKERS=false
+const SPAWN_LOCAL_WORKERS = process.env.SPAWN_LOCAL_WORKERS !== 'false';
 
 class ClusterManager {
   constructor() {
@@ -130,11 +131,15 @@ class ClusterManager {
     console.log(`${colors.bright}🤖 Запуск Android Cluster...${colors.reset}\n`);
 
     try {
-      // Запускаем Android workers
-      for (const device of clusterConfig.devices) {
-        this.startAndroidWorker(device);
-        // Небольшая задержка между запуском устройств
-        await new Promise(resolve => setTimeout(resolve, 1000));
+      // Запускаем Android workers (если включено)
+      if (SPAWN_LOCAL_WORKERS) {
+        for (const device of clusterConfig.devices) {
+          this.startAndroidWorker(device);
+          // Небольшая задержка между запуском устройств
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+      } else {
+        console.log(`${colors.yellow}⚙️  Локальные воркеры не запускаются (SPAWN_LOCAL_WORKERS=false). Используем удалённые устройства.${colors.reset}`);
       }
 
       // Запускаем frontend

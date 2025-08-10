@@ -7,7 +7,7 @@ const deviceConfig = {
   id: 'samsung-note4',
   name: 'Samsung Note 4',
   port: 3001,
-  host: 'localhost' // Для локального тестирования
+  host: '192.168.0.9' // IP телефона в сети
 };
 
 // Тестовые задачи

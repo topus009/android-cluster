@@ -26,9 +26,7 @@ app.use(express.json());
 // Конфигурация кластера
 const clusterConfig = {
   devices: [
-    { id: 'samsung-note4', name: 'Samsung Note 4', port: 3001, host: '192.168.1.101' },
-    { id: 'samsung-nexus', name: 'Samsung Google Nexus', port: 3002, host: '192.168.1.102' },
-    { id: 'alcatel-7043', name: 'Alcatel One Touch 7043', port: 3003, host: '192.168.1.103' }
+    { id: 'samsung-note4', name: 'Samsung Note 4', port: 3001, host: '192.168.0.9' }
   ]
 };
 

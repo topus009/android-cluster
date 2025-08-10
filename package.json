@@ -12,7 +12,9 @@
     "test:workers": "cd android-workers && pnpm test",
     "test:frontend": "cd frontend-interface && pnpm test",
     "android:start": "cd android-workers && pnpm start",
-    "frontend:start": "cd frontend-interface && pnpm start"
+    "frontend:start": "cd frontend-interface && pnpm start",
+    "repo:hard-reset": "git fetch origin && git reset --hard origin/main && git clean -fdx",
+    "device:start": "cd android-workers && node start-device.js"
   },
   "keywords": [
     "android",

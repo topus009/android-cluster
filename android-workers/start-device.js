@@ -45,11 +45,11 @@ const deviceInfo = {
   platform: 'Android',
   nodeVersion: process.version,
   startTime: new Date().toISOString(),
-  capabilities: device.capabilities || {
+  capabilities: device?.capabilities || {
     maxConcurrentTasks: 5,
     supportedOperations: ['factorial', 'primeNumbers', 'arraySort', 'hash', 'fibonacci']
   },
-  performance: device.performance || {
+  performance: device?.performance || {
     expectedResponseTime: 100,
     memoryLimit: 256 * 1024 * 1024
   }

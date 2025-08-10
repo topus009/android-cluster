@@ -14,12 +14,21 @@
     "android:start": "cd android-workers && pnpm start",
     "frontend:start": "cd frontend-interface && pnpm start"
   },
-  "keywords": ["android", "cluster", "performance", "testing", "nodejs"],
+  "keywords": [
+    "android",
+    "cluster",
+    "performance",
+    "testing",
+    "nodejs"
+  ],
   "author": "Android Cluster Team",
   "license": "MIT",
   "packageManager": "pnpm@8.0.0",
   "devDependencies": {
     "@types/node": "^20.0.0",
     "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "axios": "^1.11.0"
   }
 }

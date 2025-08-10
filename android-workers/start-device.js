@@ -380,7 +380,7 @@ const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`📊 Статистика: http://0.0.0.0:${PORT}/api/stats`);
   console.log(`💚 Health check: http://0.0.0.0:${PORT}/health`);
   console.log(`🔌 WebSocket: ws://0.0.0.0:${PORT}`);
-  console.log(`⚡ Максимум задач: ${device.capabilities?.maxConcurrentTasks || 5}`);
+  console.log(`⚡ Максимум задач: ${device.capabilities.maxConcurrentTasks || 5}`);
   console.log(`💾 Лимит памяти: ${Math.round(device.performance.memoryLimit / 1024 / 1024)}MB`);
 });
 
